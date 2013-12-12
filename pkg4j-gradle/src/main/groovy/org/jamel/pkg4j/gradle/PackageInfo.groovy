@@ -26,6 +26,7 @@ class PackageInfo {
     def List<Map<String, String>> dirs = []
     def List<Map<String, String>> dirsToPack = []
 
+    def List<String> preinstCommands = []
     def List<String> postinstCommands = []
     def List<String> prermCommands = []
 
@@ -67,6 +68,7 @@ class PackageInfo {
             dirs.addAll(commonPkg.dirs)
             dirsToPack.addAll(commonPkg.dirsToPack)
 
+            preinstCommands.addAll commonPkg.preinstCommands
             postinstCommands.addAll commonPkg.postinstCommands
             prermCommands.addAll(commonPkg.prermCommands)
         }
@@ -93,6 +95,7 @@ class PackageInfo {
             time: DateFormatUtils.SMTP_DATETIME_FORMAT.format(new Date()),
             depends: StringUtils.join(depends, ", "),
             dirs: dirs,
+            preinstCommands: preinstCommands,
             postinstCommands: postinstCommands,
             prermCommands: prermCommands
         ]
@@ -144,6 +147,14 @@ class PackageInfo {
         with closure
     }
 
+    def void preinst(Closure closure) {
+        new Object() {
+            void exec(String command) {
+                preinstCommands << command
+            }
+        }.with closure
+    }
+
     def void postinst(Closure closure) {
         new Object() {
             void exec(String command) {
@@ -176,6 +187,7 @@ class PackageInfo {
                 ",\n  depends=" + depends +
                 ",\n  dirs=" + dirs +
                 ",\n  dirsToPack=" + dirsToPack +
+                ",\n  preinstCommands=" + preinstCommands +
                 ",\n  postinstCommands=" + postinstCommands +
                 ",\n  prermCommands=" + prermCommands +
                 "\n}";
